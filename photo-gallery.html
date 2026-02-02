@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 100px 20px 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            letter-spacing: -0.03em;
+            animation: floatIn 1s ease forwards;
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        @keyframes floatIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            animation: floatIn 1s ease forwards 0.2s;
+            opacity: 0;
+        }
+
+        .gallery-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 30px 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 20px;
+            max-width: 550px;
+            margin: 0 auto 50px;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            padding: 50px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .upload-area p {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .upload-btn {
+            background: #ffffff;
+            color: #667eea;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.8s ease forwards 0.4s;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .photo-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-card:hover {
+            transform: translateY(-12px) rotate(-1deg);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .photo-card:nth-child(even):hover {
+            transform: translateY(-12px) rotate(1deg);
+        }
+
+        .photo-wrapper {
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(102, 126, 234, 0.95) 0%, transparent 100%);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .photo-card:hover .photo-overlay {
+            transform: translateY(0);
+        }
+
+        .photo-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .photo-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5) rotate(-5deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: #ffffff;
+            border: none;
+            color: #667eea;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .lightbox-close:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: #f093fb;
+            color: #ffffff;
+        }
+
+        .instructions {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .instructions h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .instructions p {
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .instructions code {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 3rem;
+            }
+
+            .header {
+                padding: 70px 20px 40px;
+            }
+
+            .gallery-container {
+                padding: 30px 20px 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Memories</h1>
+        <p class="subtitle">Your beautiful moments in vibrant colors</p>
+    </div>
+
+    <div class="gallery-container">
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p>✨ Upload your favorite photos</p>
+                <button class="upload-btn">Choose Files</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" multiple>
+        </div>
+
+        <div class="instructions">
+            <h2>🚀 Connect Google Drive</h2>
+            <p>To display your Google Drive images:</p>
+            <p>1. Right-click your image in Drive → "Get link"</p>
+            <p>2. Set sharing to "Anyone with the link can view"</p>
+            <p>3. Copy the file ID from the URL (between <code>/d/</code> and <code>/view</code>)</p>
+            <p>4. Use format: <code>https://drive.google.com/uc?export=view&id=YOUR_FILE_ID</code></p>
+            <p>5. Add to the <code>photos</code> array in the code!</p>
+        </div>
+
+        <div class="gallery-grid" id="gallery">
+            <!-- Photos will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img id="lightbox-img" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        // Example photos array - Replace with your Google Drive image URLs
+        const photos = [
+            {
+                src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+                title: 'Mountain Vista',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
+                title: 'Forest Path',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
+                title: 'Coastal Sunset',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800',
+                title: 'Urban Landscape',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+                title: 'Beach Paradise',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800',
+                title: 'Desert Dreams',
+                description: 'Replace with your Google Drive image'
+            }
+        ];
+
+        // Render gallery
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            photos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.onclick = () => openLightbox(photo.src);
+
+                card.innerHTML = `
+                    <div class="photo-wrapper">
+                        <img src="${photo.src}" alt="${photo.title}" loading="lazy">
+                        <div class="photo-overlay">
+                            <div class="photo-title">${photo.title}</div>
+                            <div class="photo-description">${photo.description}</div>
+                        </div>
+                    </div>
+                `;
+
+                gallery.appendChild(card);
+            });
+        }
+
+        // Handle file upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    photos.push({
+                        src: e.target.result,
+                        title: file.name.replace(/\.[^/.]+$/, ""),
+                        description: 'Uploaded photo'
+                    });
+                    renderGallery();
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Lightbox functions
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        }
+
+        // Close lightbox on background click
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        // Close lightbox with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // Initialize gallery
+        renderGallery();
+    </script>
+</body>
+</html>
