@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Gallery - Google Drive Helper</title>
+    <title>Photo Gallery</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -35,122 +35,114 @@
             z-index: 1;
         }
 
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 40px 30px;
+        .header {
+            text-align: center;
+            padding: 100px 20px 60px;
             position: relative;
             z-index: 2;
         }
 
-        .header {
-            text-align: center;
-            padding: 60px 20px 40px;
-        }
-
         h1 {
             font-family: 'Fraunces', serif;
-            font-size: clamp(3rem, 8vw, 5rem);
+            font-size: clamp(3.5rem, 10vw, 7rem);
             font-weight: 900;
             color: #ffffff;
             text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
             margin-bottom: 15px;
             letter-spacing: -0.03em;
+            animation: floatIn 1s ease forwards;
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        @keyframes floatIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: rgba(255, 255, 255, 0.9);
             font-weight: 400;
-            margin-bottom: 40px;
+            letter-spacing: 0.05em;
+            animation: floatIn 1s ease forwards 0.2s;
+            opacity: 0;
         }
 
-        .helper-section {
-            background: rgba(255, 255, 255, 0.95);
+        .gallery-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 30px 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 20px;
+            max-width: 550px;
+            margin: 0 auto 50px;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.4);
             border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            padding: 50px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .helper-section h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 2rem;
-            color: #667eea;
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .upload-area p {
+            font-size: 1.1rem;
+            color: #ffffff;
             margin-bottom: 20px;
+            font-weight: 500;
         }
 
-        .helper-section p {
-            color: #333;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            margin: 25px 0;
-        }
-
-        .input-group label {
-            display: block;
-            font-weight: 700;
+        .upload-btn {
+            background: #ffffff;
             color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 150px;
-            padding: 15px;
-            border: 2px solid #667eea;
-            border-radius: 12px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1rem;
-            resize: vertical;
-        }
-
-        .btn {
-            background: #667eea;
-            color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 1.1rem;
+            padding: 16px 45px;
+            font-size: 1rem;
             font-weight: 700;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-            margin: 10px 5px;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
-        .btn:hover {
+        .upload-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
         }
 
-        .btn-secondary {
-            background: #f093fb;
-        }
-
-        .output-box {
-            background: #f8f9fa;
-            border: 2px solid #667eea;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
+        #fileInput {
+            display: none;
         }
 
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
-            margin-top: 40px;
+            animation: fadeIn 0.8s ease forwards 0.4s;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
         .photo-card {
@@ -166,6 +158,10 @@
         .photo-card:hover {
             transform: translateY(-12px) rotate(-1deg);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .photo-card:nth-child(even):hover {
+            transform: translateY(-12px) rotate(1deg);
         }
 
         .photo-wrapper {
@@ -207,6 +203,11 @@
             color: #ffffff;
         }
 
+        .photo-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         .lightbox {
             display: none;
             position: fixed;
@@ -232,6 +233,18 @@
             max-width: 90%;
             max-height: 90vh;
             position: relative;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5) rotate(-5deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
         }
 
         .lightbox-content img {
@@ -259,239 +272,190 @@
             justify-content: center;
             font-weight: 700;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .lightbox-close:hover {
             transform: rotate(90deg) scale(1.1);
+            background: #f093fb;
+            color: #ffffff;
         }
 
-        .steps {
-            background: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid white;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
+        .instructions {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .steps ol {
-            margin-left: 20px;
-            color: white;
+        .instructions h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-weight: 900;
         }
 
-        .steps li {
-            margin: 10px 0;
-            line-height: 1.6;
+        .instructions p {
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 1rem;
         }
 
-        code {
-            background: rgba(0,0,0,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+        .instructions code {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9em;
         }
 
-        .success {
-            background: #4caf50;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            display: none;
-        }
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
 
-        .error {
-            background: #f44336;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            display: none;
+            h1 {
+                font-size: 3rem;
+            }
+
+            .header {
+                padding: 70px 20px 40px;
+            }
+
+            .gallery-container {
+                padding: 30px 20px 60px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎨 Photo Gallery Helper</h1>
-            <p class="subtitle">Easily add all your Google Drive photos</p>
+    <div class="header">
+        <h1>Memories</h1>
+        <p class="subtitle">Your beautiful moments in vibrant colors</p>
+    </div>
+
+    <div class="gallery-container">
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p>✨ Upload your favorite photos</p>
+                <button class="upload-btn">Choose Files</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" multiple>
         </div>
 
-        <!-- Helper Tool Section -->
-        <div class="helper-section">
-            <h2>📸 Quick Setup Tool</h2>
-            <p>This tool will help you quickly add all photos from your Google Drive folder!</p>
-
-            <div class="steps">
-                <ol>
-                    <li>Go to your Google Drive folder: <code>https://drive.google.com/drive/folders/1If8tfszZ9N6dEBTCqpY5DYO4PS9NTL7E</code></li>
-                    <li>Open each image → Right-click → "Get link" → Set to "Anyone with the link"</li>
-                    <li>Copy each complete shareable link (one per line) and paste below</li>
-                    <li>Click "Generate Code" and your gallery will update automatically!</li>
-                </ol>
-            </div>
-
-            <div class="input-group">
-                <label>📋 Paste your Google Drive image links here (one per line):</label>
-                <textarea id="driveLinks" placeholder="Paste links like:
-https://drive.google.com/file/d/1AbC123XyZ456/view?usp=sharing
-https://drive.google.com/file/d/1DeF789GhI012/view?usp=sharing
-https://drive.google.com/file/d/1JkL345MnO678/view?usp=sharing
-
-Or paste File IDs only (one per line):
-1AbC123XyZ456
-1DeF789GhI012
-1JkL345MnO678"></textarea>
-            </div>
-
-            <button class="btn" onclick="generateGallery()">✨ Generate Gallery</button>
-            <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
-
-            <div class="success" id="successMsg">✅ Gallery generated! Scroll down to see your photos.</div>
-            <div class="error" id="errorMsg">⚠️ Please paste valid Google Drive links or file IDs.</div>
-
-            <div id="codeOutput" style="display:none;">
-                <h3 style="margin-top: 30px; color: #667eea;">Generated Code (for saving):</h3>
-                <div class="output-box" id="outputBox"></div>
-            </div>
+        <div class="instructions">
+            <h2>🚀 Connect Google Drive</h2>
+            <p>To display your Google Drive images:</p>
+            <p>1. Right-click your image in Drive → "Get link"</p>
+            <p>2. Set sharing to "Anyone with the link can view"</p>
+            <p>3. Copy the file ID from the URL (between <code>/d/</code> and <code>/view</code>)</p>
+            <p>4. Use format: <code>https://drive.google.com/uc?export=view&id=YOUR_FILE_ID</code></p>
+            <p>5. Add to the <code>photos</code> array in the code!</p>
         </div>
 
-        <!-- Gallery Section -->
-        <div class="helper-section" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
-            <h2 style="color: white;">Your Gallery</h2>
-            <div class="gallery-grid" id="gallery"></div>
+        <div class="gallery-grid" id="gallery">
+            <!-- Photos will be dynamically added here -->
         </div>
     </div>
 
     <!-- Lightbox -->
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-        <div class="lightbox-content" onclick="event.stopPropagation()">
-            <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
             <img id="lightbox-img" src="" alt="">
         </div>
     </div>
 
     <script>
-        let photos = [];
+        // Example photos array - Replace with your Google Drive image URLs
+        const photos = [
+            {
+                src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+                title: 'Mountain Vista',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
+                title: 'Forest Path',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800',
+                title: 'Coastal Sunset',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800',
+                title: 'Urban Landscape',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+                title: 'Beach Paradise',
+                description: 'Replace with your Google Drive image'
+            },
+            {
+                src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800',
+                title: 'Desert Dreams',
+                description: 'Replace with your Google Drive image'
+            }
+        ];
 
-        function extractFileId(link) {
-            // Extract file ID from various Google Drive URL formats
-            link = link.trim();
-            
-            // If it's already just a file ID (no slashes or dots)
-            if (!link.includes('/') && !link.includes('.') && link.length > 20) {
-                return link;
-            }
-            
-            // Match various Google Drive URL patterns
-            const patterns = [
-                /\/d\/([a-zA-Z0-9_-]+)/,  // /d/FILE_ID
-                /id=([a-zA-Z0-9_-]+)/,     // id=FILE_ID
-                /\/file\/d\/([a-zA-Z0-9_-]+)/,  // /file/d/FILE_ID
-            ];
-            
-            for (let pattern of patterns) {
-                const match = link.match(pattern);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-            
-            return null;
-        }
-
-        function generateGallery() {
-            const input = document.getElementById('driveLinks').value;
-            const lines = input.split('\n').filter(line => line.trim());
-            
-            if (lines.length === 0) {
-                showError();
-                return;
-            }
-            
-            photos = [];
-            let validCount = 0;
-            
-            lines.forEach((line, index) => {
-                const fileId = extractFileId(line);
-                if (fileId) {
-                    photos.push({
-                        src: `https://drive.google.com/uc?export=view&id=${fileId}`,
-                        title: `Photo ${index + 1}`,
-                        description: 'From Google Drive'
-                    });
-                    validCount++;
-                }
-            });
-            
-            if (validCount === 0) {
-                showError();
-                return;
-            }
-            
-            renderGallery();
-            showSuccess();
-            generateCodeOutput();
-        }
-
+        // Render gallery
         function renderGallery() {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = '';
-            
-            if (photos.length === 0) {
-                gallery.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">No photos yet. Use the tool above to add your Google Drive photos!</p>';
-                return;
-            }
-            
+
             photos.forEach((photo, index) => {
                 const card = document.createElement('div');
                 card.className = 'photo-card';
+                card.style.animationDelay = `${index * 0.1}s`;
                 card.onclick = () => openLightbox(photo.src);
-                
+
                 card.innerHTML = `
                     <div class="photo-wrapper">
-                        <img src="${photo.src}" alt="${photo.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x500?text=Image+Not+Found'">
+                        <img src="${photo.src}" alt="${photo.title}" loading="lazy">
                         <div class="photo-overlay">
                             <div class="photo-title">${photo.title}</div>
+                            <div class="photo-description">${photo.description}</div>
                         </div>
                     </div>
                 `;
-                
+
                 gallery.appendChild(card);
             });
         }
 
-        function generateCodeOutput() {
-            const code = `const photos = ${JSON.stringify(photos, null, 4)};`;
-            document.getElementById('outputBox').textContent = code;
-            document.getElementById('codeOutput').style.display = 'block';
-        }
+        // Handle file upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
 
-        function copyCode() {
-            const code = document.getElementById('outputBox').textContent;
-            if (code) {
-                navigator.clipboard.writeText(code).then(() => {
-                    alert('Code copied to clipboard! You can save this for later.');
-                });
+                reader.onload = function(e) {
+                    photos.push({
+                        src: e.target.result,
+                        title: file.name.replace(/\.[^/.]+$/, ""),
+                        description: 'Uploaded photo'
+                    });
+                    renderGallery();
+                };
+
+                reader.readAsDataURL(file);
             }
-        }
+        });
 
-        function showSuccess() {
-            const success = document.getElementById('successMsg');
-            const error = document.getElementById('errorMsg');
-            success.style.display = 'block';
-            error.style.display = 'none';
-            setTimeout(() => {
-                success.style.display = 'none';
-            }, 5000);
-        }
-
-        function showError() {
-            const success = document.getElementById('successMsg');
-            const error = document.getElementById('errorMsg');
-            error.style.display = 'block';
-            success.style.display = 'none';
-        }
-
+        // Lightbox functions
         function openLightbox(src) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
@@ -504,13 +468,21 @@ Or paste File IDs only (one per line):
             lightbox.classList.remove('active');
         }
 
+        // Close lightbox on background click
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        // Close lightbox with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLightbox();
             }
         });
 
-        // Initialize with empty gallery
+        // Initialize gallery
         renderGallery();
     </script>
 </body>
