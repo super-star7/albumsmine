@@ -1,1 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery - Google Drive Helper</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        .helper-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .helper-section h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .helper-section p {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin: 25px 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f093fb;
+        }
+
+        .output-box {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .photo-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-card:hover {
+            transform: translateY(-12px) rotate(-1deg);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .photo-wrapper {
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(102, 126, 234, 0.95) 0%, transparent 100%);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .photo-card:hover .photo-overlay {
+            transform: translateY(0);
+        }
+
+        .photo-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: #ffffff;
+            border: none;
+            color: #667eea;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .steps ol {
+            margin-left: 20px;
+            color: white;
+        }
+
+        .steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .success {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Photo Gallery Helper</h1>
+            <p class="subtitle">Easily add all your Google Drive photos</p>
+        </div>
+
+        <!-- Helper Tool Section -->
+        <div class="helper-section">
+            <h2>📸 Quick Setup Tool</h2>
+            <p>This tool will help you quickly add all photos from your Google Drive folder!</p>
+
+            <div class="steps">
+                <ol>
+                    <li>Go to your Google Drive folder: <code>https://drive.google.com/drive/folders/1If8tfszZ9N6dEBTCqpY5DYO4PS9NTL7E</code></li>
+                    <li>Open each image → Right-click → "Get link" → Set to "Anyone with the link"</li>
+                    <li>Copy each complete shareable link (one per line) and paste below</li>
+                    <li>Click "Generate Code" and your gallery will update automatically!</li>
+                </ol>
+            </div>
+
+            <div class="input-group">
+                <label>📋 Paste your Google Drive image links here (one per line):</label>
+                <textarea id="driveLinks" placeholder="Paste links like:
+https://drive.google.com/file/d/1AbC123XyZ456/view?usp=sharing
+https://drive.google.com/file/d/1DeF789GhI012/view?usp=sharing
+https://drive.google.com/file/d/1JkL345MnO678/view?usp=sharing
+
+Or paste File IDs only (one per line):
+1AbC123XyZ456
+1DeF789GhI012
+1JkL345MnO678"></textarea>
+            </div>
+
+            <button class="btn" onclick="generateGallery()">✨ Generate Gallery</button>
+            <button class="btn btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+
+            <div class="success" id="successMsg">✅ Gallery generated! Scroll down to see your photos.</div>
+            <div class="error" id="errorMsg">⚠️ Please paste valid Google Drive links or file IDs.</div>
+
+            <div id="codeOutput" style="display:none;">
+                <h3 style="margin-top: 30px; color: #667eea;">Generated Code (for saving):</h3>
+                <div class="output-box" id="outputBox"></div>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div class="helper-section" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
+            <h2 style="color: white;">Your Gallery</h2>
+            <div class="gallery-grid" id="gallery"></div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox()">×</button>
+            <img id="lightbox-img" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        let photos = [];
+
+        function extractFileId(link) {
+            // Extract file ID from various Google Drive URL formats
+            link = link.trim();
+            
+            // If it's already just a file ID (no slashes or dots)
+            if (!link.includes('/') && !link.includes('.') && link.length > 20) {
+                return link;
+            }
+            
+            // Match various Google Drive URL patterns
+            const patterns = [
+                /\/d\/([a-zA-Z0-9_-]+)/,  // /d/FILE_ID
+                /id=([a-zA-Z0-9_-]+)/,     // id=FILE_ID
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,  // /file/d/FILE_ID
+            ];
+            
+            for (let pattern of patterns) {
+                const match = link.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return null;
+        }
+
+        function generateGallery() {
+            const input = document.getElementById('driveLinks').value;
+            const lines = input.split('\n').filter(line => line.trim());
+            
+            if (lines.length === 0) {
+                showError();
+                return;
+            }
+            
+            photos = [];
+            let validCount = 0;
+            
+            lines.forEach((line, index) => {
+                const fileId = extractFileId(line);
+                if (fileId) {
+                    photos.push({
+                        src: `https://drive.google.com/uc?export=view&id=${fileId}`,
+                        title: `Photo ${index + 1}`,
+                        description: 'From Google Drive'
+                    });
+                    validCount++;
+                }
+            });
+            
+            if (validCount === 0) {
+                showError();
+                return;
+            }
+            
+            renderGallery();
+            showSuccess();
+            generateCodeOutput();
+        }
+
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            
+            if (photos.length === 0) {
+                gallery.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">No photos yet. Use the tool above to add your Google Drive photos!</p>';
+                return;
+            }
+            
+            photos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.onclick = () => openLightbox(photo.src);
+                
+                card.innerHTML = `
+                    <div class="photo-wrapper">
+                        <img src="${photo.src}" alt="${photo.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x500?text=Image+Not+Found'">
+                        <div class="photo-overlay">
+                            <div class="photo-title">${photo.title}</div>
+                        </div>
+                    </div>
+                `;
+                
+                gallery.appendChild(card);
+            });
+        }
+
+        function generateCodeOutput() {
+            const code = `const photos = ${JSON.stringify(photos, null, 4)};`;
+            document.getElementById('outputBox').textContent = code;
+            document.getElementById('codeOutput').style.display = 'block';
+        }
+
+        function copyCode() {
+            const code = document.getElementById('outputBox').textContent;
+            if (code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Code copied to clipboard! You can save this for later.');
+                });
+            }
+        }
+
+        function showSuccess() {
+            const success = document.getElementById('successMsg');
+            const error = document.getElementById('errorMsg');
+            success.style.display = 'block';
+            error.style.display = 'none';
+            setTimeout(() => {
+                success.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError() {
+            const success = document.getElementById('successMsg');
+            const error = document.getElementById('errorMsg');
+            error.style.display = 'block';
+            success.style.display = 'none';
+        }
+
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // Initialize with empty gallery
+        renderGallery();
+    </script>
+</body>
+</html>
